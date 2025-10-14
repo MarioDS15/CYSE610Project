@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard Pro</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="../../assets/icons/icon48.png" alt="PhishGuard Pro" class="logo">
+            <h1>PhishGuard Pro</h1>
+        </header>
+        
+        <main class="main-content">
+            <div class="status-section">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-icon">🔍</span>
+                    <span class="status-text">Analyzing...</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+                <div class="confidence-text" id="confidenceText">0%</div>
+            </div>
+            
+            <div class="details-section" id="detailsSection" style="display: none;">
+                <h3>Analysis Details</h3>
+                <div class="feature-list" id="featureList"></div>
+            </div>
+            
+            <div class="actions-section">
+                <button id="scanButton" class="btn btn-primary">Scan Current Page</button>
+                <button id="reportButton" class="btn btn-secondary">Report Issue</button>
+                <button id="settingsButton" class="btn btn-outline">Settings</button>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <div class="stats">
+                <span id="scansCount">0 scans today</span>
+                <span id="threatsBlocked">0 threats blocked</span>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

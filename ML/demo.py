@@ -4,7 +4,7 @@ Interactive demo of the phishing detection system
 """
 
 from phishing_detector import PhishingDetector
-from download_dataset import load_dataset
+from Setup.download_dataset import load_dataset
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split

@@ -15,12 +15,12 @@ def run_experiment():
     print("=" * 50)
     
     # Check if dataset exists
-    if not os.path.exists('data/phishing_dataset.csv'):
+    if not os.path.exists('../data/phishing_dataset.csv'):
         print("📊 Creating dataset...")
-        subprocess.run([sys.executable, 'download_dataset.py'], check=True)
+        subprocess.run([sys.executable, '../Setup/download_dataset.py'], check=True)
     
     print("🤖 Running phishing detection system...")
-    subprocess.run([sys.executable, 'main.py'], check=True)
+    subprocess.run([sys.executable, '../main.py'], check=True)
     
     print("\n✅ Experiment completed successfully!")
     print("\n📁 Generated files:")

@@ -1,39 +1,83 @@
 #!/usr/bin/env python3
 """
-Main script to run the complete phishing detection system
-with real dataset loading and comprehensive evaluation
+Enhanced Phishing URL Detection System
+Uses expanded multi-source dataset with deduplication
 """
 
-from phishing_detector import PhishingDetector
-from download_dataset import load_dataset
+from ML.phishing_detector import PhishingDetector
+from Setup.enhanced_dataset_collector import EnhancedDatasetCollector
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import roc_auc_score, roc_curve
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
-def analyze_dataset(df):
+def load_or_create_enhanced_dataset():
     """
-    Analyze the dataset characteristics
+    Load existing enhanced dataset or create new one
     """
-    print("=== Dataset Analysis ===")
-    print(f"Total URLs: {len(df)}")
-    print(f"Legitimate URLs: {len(df[df['label'] == 0])} ({len(df[df['label'] == 0])/len(df)*100:.1f}%)")
-    print(f"Phishing URLs: {len(df[df['label'] == 1])} ({len(df[df['label'] == 1])/len(df)*100:.1f}%)")
+    dataset_path = 'data/enhanced_phishing_dataset.csv'
+    
+    if os.path.exists(dataset_path):
+        print("📊 Loading existing enhanced dataset...")
+        df = pd.read_csv(dataset_path)
+        print(f"   Loaded {len(df):,} URLs from existing dataset")
+        return df
+    else:
+        print("📊 Creating new enhanced dataset...")
+        collector = EnhancedDatasetCollector()
+        collector.collect_all_sources(phishing_limit=2000, legitimate_limit=2000)
+        collector.save_dataset(dataset_path)
+        
+        df = pd.read_csv(dataset_path)
+        print(f"   Created new dataset with {len(df):,} URLs")
+        return df
+
+def analyze_enhanced_dataset(df):
+    """
+    Comprehensive analysis of the enhanced dataset
+    """
+    print("\n=== ENHANCED DATASET ANALYSIS ===")
+    print(f"Total URLs: {len(df):,}")
+    print(f"Legitimate URLs: {len(df[df['label'] == 0]):,} ({len(df[df['label'] == 0])/len(df)*100:.1f}%)")
+    print(f"Phishing URLs: {len(df[df['label'] == 1]):,} ({len(df[df['label'] == 1])/len(df)*100:.1f}%)")
+    
+    # Source analysis
+    print(f"\n📈 Source Distribution:")
+    source_counts = df['source'].value_counts()
+    for source, count in source_counts.items():
+        phishing_count = len(df[(df['source'] == source) & (df['label'] == 1)])
+        legitimate_count = len(df[(df['source'] == source) & (df['label'] == 0)])
+        print(f"   {source}: {count:,} URLs (P: {phishing_count:,}, L: {legitimate_count:,})")
     
     # URL length analysis
     df['url_length'] = df['url'].str.len()
-    print(f"\nURL Length Statistics:")
-    print(f"Average URL length: {df['url_length'].mean():.1f}")
-    print(f"Legitimate URLs - Average length: {df[df['label']==0]['url_length'].mean():.1f}")
-    print(f"Phishing URLs - Average length: {df[df['label']==1]['url_length'].mean():.1f}")
+    print(f"\n📏 URL Length Statistics:")
+    print(f"   Average URL length: {df['url_length'].mean():.1f}")
+    print(f"   Legitimate URLs - Average: {df[df['label']==0]['url_length'].mean():.1f}")
+    print(f"   Phishing URLs - Average: {df[df['label']==1]['url_length'].mean():.1f}")
+    print(f"   Min length: {df['url_length'].min()}")
+    print(f"   Max length: {df['url_length'].max()}")
     
     # Domain analysis
     df['domain'] = df['url'].apply(lambda x: x.split('/')[2] if '://' in x else x.split('/')[0])
-    print(f"\nDomain Statistics:")
-    print(f"Unique domains: {df['domain'].nunique()}")
+    print(f"\n🌐 Domain Statistics:")
+    print(f"   Unique domains: {df['domain'].nunique():,}")
+    print(f"   Most common domains:")
+    top_domains = df['domain'].value_counts().head(10)
+    for domain, count in top_domains.items():
+        print(f"     {domain}: {count}")
+    
+    # TLD analysis
+    df['tld'] = df['domain'].apply(lambda x: x.split('.')[-1] if '.' in x else '')
+    print(f"\n🏷️  Top-Level Domain Analysis:")
+    tld_counts = df['tld'].value_counts().head(10)
+    for tld, count in tld_counts.items():
+        phishing_count = len(df[(df['tld'] == tld) & (df['label'] == 1)])
+        print(f"     .{tld}: {count:,} ({phishing_count:,} phishing)")
     
     return df
 
@@ -229,20 +273,20 @@ def test_real_world_examples(detector):
 
 def main():
     """
-    Main function to run the complete phishing detection system
+    Main function for enhanced phishing detection system
     """
-    print("=== Advanced Phishing URL Detection System ===")
-    print("Using Real Dataset with Comprehensive Feature Engineering\n")
+    print("🛡️  ENHANCED PHISHING URL DETECTION SYSTEM")
+    print("=" * 60)
+    print("Using Multi-Source Dataset with Advanced Deduplication\n")
     
     # Initialize detector
     detector = PhishingDetector()
     
-    # Load dataset
-    print("Loading dataset...")
-    df = load_dataset()
+    # Load or create enhanced dataset
+    df = load_or_create_enhanced_dataset()
     
-    # Analyze dataset
-    df = analyze_dataset(df)
+    # Analyze enhanced dataset
+    df = analyze_enhanced_dataset(df)
     
     # Extract features
     print("\nExtracting features from URLs...")
@@ -271,18 +315,23 @@ def main():
     # Test on real-world examples
     test_real_world_examples(detector)
     
-    # Summary
-    print("\n=== FINAL SUMMARY ===")
-    print(f"Model trained successfully with {len(feature_importance)} features")
-    print(f"Final Accuracy: {results['accuracy']:.4f}")
-    print(f"Final F1-Score: {results['f1']:.4f}")
-    print(f"ROC AUC Score: {results['roc_auc']:.4f}")
-    print(f"Successfully detected {results['confusion_matrix'][1,1]} phishing URLs")
-    print(f"Correctly identified {results['confusion_matrix'][0,0]} legitimate URLs")
+    # Final summary
+    print("\n=== FINAL ENHANCED SUMMARY ===")
+    print(f"🚀 Enhanced system with {len(df):,} URLs from {df['source'].nunique()} sources")
+    print(f"📊 Model trained with {len(feature_importance)} advanced features")
+    print(f"🎯 Final Accuracy: {results['accuracy']:.4f}")
+    print(f"🏆 Final F1-Score: {results['f1']:.4f}")
+    print(f"📈 ROC AUC Score: {results['roc_auc']:.4f}")
+    print(f"✅ Successfully detected {results['confusion_matrix'][1,1]} phishing URLs")
+    print(f"✅ Correctly identified {results['confusion_matrix'][0,0]} legitimate URLs")
     
-    print("\nTop 5 Most Important Features:")
+    print(f"\n🔧 Top 5 Most Important Features:")
     for i, (_, row) in enumerate(feature_importance.head(5).iterrows()):
-        print(f"{i+1}. {row['feature']}: {row['importance']:.4f}")
+        print(f"   {i+1}. {row['feature']}: {row['importance']:.4f}")
+    
+    print(f"\n📈 Dataset Sources:")
+    for source, count in df['source'].value_counts().items():
+        print(f"   {source}: {count:,} URLs")
 
 if __name__ == "__main__":
     main()

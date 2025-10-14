@@ -168,7 +168,7 @@ if url_hash not in url_hashes:
 ### New Files Created
 ```
 enhanced_dataset_collector.py     # Multi-source data collection
-enhanced_main.py                  # Enhanced evaluation system
+main.py                          # Enhanced evaluation system (consolidated)
 enhanced_phishing_dataset.csv     # Expanded dataset (2,557 URLs)
 enhanced_phishing_detection_results.png  # Enhanced visualizations
 ```

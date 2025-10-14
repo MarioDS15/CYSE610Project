@@ -32,8 +32,7 @@ CYSE610Project/
 ├── Core System Files
 │   ├── phishing_detector.py           # Main ML detection system
 │   ├── enhanced_dataset_collector.py  # Multi-source data collection
-│   ├── enhanced_main.py              # Enhanced evaluation system
-│   └── main.py                       # Original evaluation system
+│   └── main.py                       # Enhanced evaluation system (consolidated)
 ├── Dataset Management
 │   ├── download_dataset.py           # Original dataset creation
 │   └── run_experiment.py             # Quick experiment runner
@@ -303,7 +302,7 @@ CYSE610Project/
 
 ---
 
-### 3. `enhanced_main.py` - Enhanced Evaluation System
+### 3. `main.py` - Enhanced Evaluation System (Consolidated)
 
 **Purpose:** Advanced evaluation system using multi-source dataset with comprehensive analysis.
 
@@ -571,7 +570,7 @@ joblib==1.3.2
 |----------|------|---------|------------|---------|
 | `analyze_dataset()` | main.py | Analyze dataset characteristics | df | DataFrame |
 | `enhanced_evaluation()` | main.py | Enhanced model evaluation | detector, X_test, y_test | dict |
-| `cross_validate_by_source()` | enhanced_main.py | Cross-validation by source | detector, df, X, y | None |
+| `cross_validate_by_source()` | main.py | Cross-validation by source | detector, df, X, y | None |
 | `test_real_world_examples()` | main.py | Test on real URLs | detector | None |
 
 ### Utility Functions
@@ -637,11 +636,8 @@ python demo.py test
 ### Complete Experiment
 
 ```bash
-# Run original system
+# Run enhanced system (now the default)
 python main.py
-
-# Run enhanced system
-python enhanced_main.py
 
 # Run complete experiment
 python run_experiment.py

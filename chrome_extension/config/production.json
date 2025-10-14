@@ -1,0 +1,15 @@
+{
+  "debug": false,
+  "logLevel": "error",
+  "modelUpdateInterval": 604800000,
+  "confidenceThreshold": 0.8,
+  "features": {
+    "urlAnalysis": true,
+    "designAnalysis": true,
+    "brandDetection": true
+  },
+  "notifications": {
+    "enabled": true,
+    "autoBlock": true
+  }
+}

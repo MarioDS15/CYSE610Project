@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Simple Phish Detector",
+  "version": "1.0.0",
+  "description": "Simple extension that sends URLs to Python backend for phishing detection",
+  "permissions": [
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Check URL for Phishing"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

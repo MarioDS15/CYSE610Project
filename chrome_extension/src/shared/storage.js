@@ -1,0 +1,1 @@
+// Chrome Extension Storage Management
