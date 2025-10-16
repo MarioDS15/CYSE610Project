@@ -17,24 +17,68 @@ warnings.filterwarnings('ignore')
 
 def load_or_create_enhanced_dataset():
     """
-    Load existing enhanced dataset or create new one
+    Load existing enhanced dataset or use available dataset
     """
-    dataset_path = 'data/enhanced_phishing_dataset.csv'
+    # Try different possible dataset locations
+    possible_paths = [
+        'ML/URL/URL Data/enhanced_phishing_dataset.csv',
+        'ML/URL/URL Data/phishing_dataset.csv',
+        'data/enhanced_phishing_dataset.csv'
+    ]
     
-    if os.path.exists(dataset_path):
-        print("📊 Loading existing enhanced dataset...")
-        df = pd.read_csv(dataset_path)
-        print(f"   Loaded {len(df):,} URLs from existing dataset")
-        return df
-    else:
-        print("📊 Creating new enhanced dataset...")
-        collector = EnhancedDatasetCollector()
-        collector.collect_all_sources(phishing_limit=2000, legitimate_limit=2000)
-        collector.save_dataset(dataset_path)
-        
-        df = pd.read_csv(dataset_path)
-        print(f"   Created new dataset with {len(df):,} URLs")
-        return df
+    for dataset_path in possible_paths:
+        if os.path.exists(dataset_path):
+            print(f"Loading dataset from: {dataset_path}")
+            df = pd.read_csv(dataset_path)
+            print(f"   Loaded {len(df):,} URLs from existing dataset")
+            return df
+    
+    # If no dataset found, create a synthetic one
+    print("No dataset found. Creating synthetic dataset for demonstration...")
+    return create_synthetic_dataset()
+
+def create_synthetic_dataset():
+    """Create a synthetic dataset for demonstration"""
+    # Legitimate URLs
+    legitimate_urls = [
+        "https://www.google.com/search?q=machine+learning",
+        "https://github.com/microsoft/vscode",
+        "https://stackoverflow.com/questions/123456",
+        "https://www.amazon.com/dp/B08N5WRWNW",
+        "https://www.paypal.com/us/home",
+        "https://www.facebook.com/pages/Example",
+        "https://www.youtube.com/watch?v=abc123",
+        "https://www.linkedin.com/in/username",
+        "https://www.wikipedia.org/wiki/Machine_learning",
+        "https://www.reddit.com/r/programming"
+    ] * 100
+    
+    # Phishing URLs
+    phishing_urls = [
+        "https://goog1e-security-alert.com/verify-account",
+        "https://paypa1-confirm-account.ml/secure-login",
+        "https://amaz0n-login-verification.tk/update-info",
+        "https://faceb00k-security-check.ga/verify-identity",
+        "https://app1e-id-verification.cf/confirm-details",
+        "https://micros0ft-security-alert.tk/update-security",
+        "https://ebay-account-verification.ml/secure-update",
+        "https://netflix-security-alert.ga/verify-subscription",
+        "https://twitt3r-account-security.tk/confirm-account",
+        "https://instagr4m-security-check.ml/verify-login"
+    ] * 100
+    
+    # Combine
+    all_urls = legitimate_urls + phishing_urls
+    all_labels = [0] * len(legitimate_urls) + [1] * len(phishing_urls)
+    
+    df = pd.DataFrame({
+        'url': all_urls,
+        'label': all_labels,
+        'source': ['synthetic'] * len(all_urls)
+    })
+    
+    print(f"   Created synthetic dataset with {len(df)} URLs")
+    return df
 
 def analyze_enhanced_dataset(df):
     """
@@ -46,7 +90,7 @@ def analyze_enhanced_dataset(df):
     print(f"Phishing URLs: {len(df[df['label'] == 1]):,} ({len(df[df['label'] == 1])/len(df)*100:.1f}%)")
     
     # Source analysis
-    print(f"\n📈 Source Distribution:")
+    print(f"\nSource Distribution:")
     source_counts = df['source'].value_counts()
     for source, count in source_counts.items():
         phishing_count = len(df[(df['source'] == source) & (df['label'] == 1)])
@@ -55,7 +99,7 @@ def analyze_enhanced_dataset(df):
     
     # URL length analysis
     df['url_length'] = df['url'].str.len()
-    print(f"\n📏 URL Length Statistics:")
+    print(f"\nURL Length Statistics:")
     print(f"   Average URL length: {df['url_length'].mean():.1f}")
     print(f"   Legitimate URLs - Average: {df[df['label']==0]['url_length'].mean():.1f}")
     print(f"   Phishing URLs - Average: {df[df['label']==1]['url_length'].mean():.1f}")
@@ -64,7 +108,7 @@ def analyze_enhanced_dataset(df):
     
     # Domain analysis
     df['domain'] = df['url'].apply(lambda x: x.split('/')[2] if '://' in x else x.split('/')[0])
-    print(f"\n🌐 Domain Statistics:")
+    print(f"\nDomain Statistics:")
     print(f"   Unique domains: {df['domain'].nunique():,}")
     print(f"   Most common domains:")
     top_domains = df['domain'].value_counts().head(10)
@@ -73,7 +117,7 @@ def analyze_enhanced_dataset(df):
     
     # TLD analysis
     df['tld'] = df['domain'].apply(lambda x: x.split('.')[-1] if '.' in x else '')
-    print(f"\n🏷️  Top-Level Domain Analysis:")
+    print(f"\nTop-Level Domain Analysis:")
     tld_counts = df['tld'].value_counts().head(10)
     for tld, count in tld_counts.items():
         phishing_count = len(df[(df['tld'] == tld) & (df['label'] == 1)])
@@ -275,7 +319,7 @@ def main():
     """
     Main function for enhanced phishing detection system
     """
-    print("🛡️  ENHANCED PHISHING URL DETECTION SYSTEM")
+    print("ENHANCED PHISHING URL DETECTION SYSTEM")
     print("=" * 60)
     print("Using Multi-Source Dataset with Advanced Deduplication\n")
     
@@ -317,22 +361,21 @@ def main():
     
     # Final summary
     print("\n=== FINAL ENHANCED SUMMARY ===")
-    print(f"🚀 Enhanced system with {len(df):,} URLs from {df['source'].nunique()} sources")
-    print(f"📊 Model trained with {len(feature_importance)} advanced features")
-    print(f"🎯 Final Accuracy: {results['accuracy']:.4f}")
-    print(f"🏆 Final F1-Score: {results['f1']:.4f}")
-    print(f"📈 ROC AUC Score: {results['roc_auc']:.4f}")
-    print(f"✅ Successfully detected {results['confusion_matrix'][1,1]} phishing URLs")
-    print(f"✅ Correctly identified {results['confusion_matrix'][0,0]} legitimate URLs")
+    print(f"Enhanced system with {len(df):,} URLs from {df['source'].nunique()} sources")
+    print(f"Model trained with {len(feature_importance)} advanced features")
+    print(f"Final Accuracy: {results['accuracy']:.4f}")
+    print(f"Final F1-Score: {results['f1']:.4f}")
+    print(f"ROC AUC Score: {results['roc_auc']:.4f}")
+    print(f"Successfully detected {results['confusion_matrix'][1,1]} phishing URLs")
+    print(f"Correctly identified {results['confusion_matrix'][0,0]} legitimate URLs")
     
-    print(f"\n🔧 Top 5 Most Important Features:")
+    print(f"\nTop 5 Most Important Features:")
     for i, (_, row) in enumerate(feature_importance.head(5).iterrows()):
         print(f"   {i+1}. {row['feature']}: {row['importance']:.4f}")
     
-    print(f"\n📈 Dataset Sources:")
+    print(f"\nDataset Sources:")
     for source, count in df['source'].value_counts().items():
         print(f"   {source}: {count:,} URLs")
 
 if __name__ == "__main__":
     main()
-

@@ -1,1 +1,0 @@
-// PhishGuard Pro Content Script

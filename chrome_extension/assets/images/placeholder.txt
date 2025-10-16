@@ -1,7 +1,0 @@
-# Image Assets Placeholder
-# This directory will contain:
-# - warning_icon.png
-# - safe_icon.png
-# - suspicious_icon.png
-# - logo.png
-# - loading_spinner.gif

@@ -1,1 +1,0 @@
-// Visual Design Feature Extraction
