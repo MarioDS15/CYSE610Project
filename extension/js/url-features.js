@@ -5,17 +5,25 @@
 
 class URLFeatureExtractor {
     constructor() {
+        // Whitelist of known legitimate domains
+        this.whitelistedDomains = [
+            'google.com', 'youtube.com', 'gmail.com', 'maps.google.com',
+            'facebook.com', 'instagram.com', 'whatsapp.com', 'messenger.com',
+            'amazon.com', 'amazon.co.uk', 'amazon.ca', 'amazon.de',
+            'apple.com', 'icloud.com', 'microsoft.com', 'live.com',
+            'outlook.com', 'office.com', 'linkedin.com', 'twitter.com',
+            'x.com', 'reddit.com', 'wikipedia.org', 'github.com',
+            'stackoverflow.com', 'paypal.com', 'ebay.com', 'netflix.com',
+            'spotify.com', 'dropbox.com', 'zoom.us', 'slack.com',
+            'adobe.com', 'salesforce.com', 'yahoo.com', 'bing.com',
+            'cloudflare.com', 'wordpress.com', 'tumblr.com'
+        ];
+
         // Suspicious keywords and patterns
         this.suspiciousKeywords = [
             'login', 'verify', 'secure', 'account', 'update', 'confirm',
-            'validate', 'authenticate', 'bank', 'paypal', 'amazon',
-            'facebook', 'google', 'apple', 'microsoft', 'support',
+            'validate', 'authenticate', 'bank', 'support',
             'password', 'signin', 'signup', 'register'
-        ];
-
-        this.brands = [
-            'google', 'facebook', 'amazon', 'apple', 'microsoft',
-            'paypal', 'ebay', 'netflix', 'twitter', 'instagram'
         ];
 
         this.suspiciousTLDs = [
@@ -31,6 +39,23 @@ class URLFeatureExtractor {
         this.suspiciousExtensions = [
             '.exe', '.scr', '.bat', '.cmd', '.com', '.pif', '.vbs'
         ];
+    }
+
+    /**
+     * Check if domain is whitelisted
+     */
+    isWhitelisted(url) {
+        try {
+            const parsedUrl = new URL(url);
+            const hostname = parsedUrl.hostname.toLowerCase();
+
+            // Check exact match or if hostname ends with whitelisted domain
+            return this.whitelistedDomains.some(domain => {
+                return hostname === domain || hostname.endsWith('.' + domain);
+            });
+        } catch (e) {
+            return false;
+        }
     }
 
     /**
@@ -105,9 +130,6 @@ class URLFeatureExtractor {
         const params = new URLSearchParams(query);
         features['num_params'] = params.size;
         features['has_suspicious_params'] = this.hasSuspiciousParams(query);
-
-        // Brand impersonation detection
-        features['suspicious_brand_usage'] = this.hasSuspiciousBrandUsage(url);
 
         // URL structure anomalies
         features['double_slash'] = (url.indexOf('//') !== url.lastIndexOf('//')) ? 1 : 0;
@@ -253,14 +275,6 @@ class URLFeatureExtractor {
     }
 
     /**
-     * Check for suspicious brand usage (potential impersonation)
-     */
-    hasSuspiciousBrandUsage(url) {
-        const urlLower = url.toLowerCase();
-        return this.brands.some(brand => urlLower.includes(brand)) ? 1 : 0;
-    }
-
-    /**
      * Get default features for invalid URLs
      */
     getDefaultFeatures() {
@@ -274,7 +288,7 @@ class URLFeatureExtractor {
             'has_suspicious_keywords', 'has_numbers_in_domain', 'has_mixed_case',
             'digit_ratio', 'letter_ratio', 'special_char_ratio', 'url_entropy',
             'domain_entropy', 'path_depth', 'has_file_extension', 'suspicious_file_ext',
-            'num_params', 'has_suspicious_params', 'suspicious_brand_usage',
+            'num_params', 'has_suspicious_params',
             'double_slash', 'trailing_slash', 'uses_https', 'uses_http'
         ];
 
@@ -303,15 +317,11 @@ class URLFeatureExtractor {
             explanations.push('Contains suspicious keywords like "login", "verify", "secure", etc.');
         }
 
-        if (features['suspicious_brand_usage']) {
-            explanations.push('Mentions well-known brands (potential impersonation)');
-        }
-
         if (features['has_shortener']) {
             explanations.push('Uses a URL shortening service (hides actual destination)');
         }
 
-        if (features['url_length'] > 75) {
+        if (features['url_length'] > 150) {
             explanations.push(`Unusually long URL (${features['url_length']} characters)`);
         }
 
@@ -339,7 +349,7 @@ class URLFeatureExtractor {
             explanations.push('Does not use HTTPS encryption');
         }
 
-        if (features['url_entropy'] > 4.5) {
+        if (features['url_entropy'] > 5.5) {
             explanations.push('High URL randomness/entropy (characteristic of generated phishing URLs)');
         }
 
